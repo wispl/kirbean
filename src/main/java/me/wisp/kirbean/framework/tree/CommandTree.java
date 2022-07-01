@@ -2,7 +2,6 @@ package me.wisp.kirbean.framework.tree;
 
 import me.wisp.kirbean.framework.reflect.CommandInfo;
 import me.wisp.kirbean.framework.tree.node.CommandNode;
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
 import java.util.ArrayList;

@@ -1,4 +1,4 @@
-package me.wisp.kirbean.interaction;
+package me.wisp.kirbean.interactivity;
 
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.ShutdownEvent;
@@ -19,10 +19,15 @@ public class ButtonEventListener implements EventListener {
             (id1, id2) -> Long.compare(pages.get(id1).getLastInteraction(), pages.get(id2).getLastInteraction())
     );
 
-    private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
+    private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(r -> {
+        Thread thread = new Thread(r);
+        thread.setDaemon(true);
+        thread.setName("Interactivity Cleanup Tread");
+        return thread;
+    });
 
     public ButtonEventListener() {
-        service.scheduleWithFixedDelay(this::purge, 0, 5, TimeUnit.SECONDS);
+        service.scheduleWithFixedDelay(this::purge, 0, 20, TimeUnit.SECONDS);
     }
 
     private void purge() {
@@ -49,7 +54,7 @@ public class ButtonEventListener implements EventListener {
         if (interactive != null) {
             try {
                 interactive.renew();
-                interactive.handle(event);
+                interactive.onEvent(event);
             } catch (Exception e) {
                 logger.warn(e.getMessage());
             }

@@ -1,6 +1,5 @@
 package me.wisp.kirbean.framework.dispatching;
 
-import me.wisp.kirbean.framework.help.HelpMessageFactory;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.EventListener;

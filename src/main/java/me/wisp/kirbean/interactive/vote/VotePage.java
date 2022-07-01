@@ -1,4 +1,4 @@
-package me.wisp.kirbean.interaction.voting;
+package me.wisp.kirbean.interactive.voting;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -26,7 +26,7 @@ public class VotePage {
     }
 
     public boolean isGoalReached() {
-        return getVotes() >= goal;
+        return goal > 0 && getVotes() >= goal;
     }
 
     public int getVotes() {

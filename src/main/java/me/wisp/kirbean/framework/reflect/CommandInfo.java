@@ -3,8 +3,6 @@ package me.wisp.kirbean.framework.reflect;
 import me.wisp.kirbean.framework.annotations.Choices;
 import me.wisp.kirbean.framework.annotations.Command;
 import me.wisp.kirbean.framework.annotations.Option;
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;

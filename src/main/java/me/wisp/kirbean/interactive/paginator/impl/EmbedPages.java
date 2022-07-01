@@ -1,6 +1,6 @@
-package me.wisp.kirbean.interaction.pagination.impl;
+package me.wisp.kirbean.interactive.pagination.impl;
 
-import me.wisp.kirbean.interaction.pagination.Pages;
+import me.wisp.kirbean.interactive.pagination.Pages;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
 import java.util.List;

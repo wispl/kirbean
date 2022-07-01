@@ -1,25 +1,32 @@
-package me.wisp.kirbean.interaction.supplier;
+package me.wisp.kirbean.interactivity.supplier;
 
-import me.wisp.kirbean.interaction.Buttons;
-import me.wisp.kirbean.interaction.Interactive;
-import me.wisp.kirbean.interaction.Interactivity;
-import net.dv8tion.jda.api.entities.MessageEmbed;
+import me.wisp.kirbean.interactivity.Interactive;
+import me.wisp.kirbean.interactivity.Interactivity;
+import net.dv8tion.jda.api.MessageBuilder;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
 public class EmbedSupplier extends Interactive {
     private final SupplierPage page;
+    private static final ActionRow BUTTONS = ActionRow.of(
+            Button.danger("supplier:CANCEL", "CANCEL"),
+            Button.primary("supplier:REPLACE", "REPLACE"),
+            Button.success("supplier:NEW", "NEW")
+    );
 
     public EmbedSupplier(SupplierPage page) {
         this.page = page;
     }
 
     @Override
-    public MessageEmbed start() {
-        return page.renderPage();
+    public Message start() {
+        return new MessageBuilder().setEmbeds(page.renderPage()).setActionRows(BUTTONS).build();
     }
 
     @Override
-    public void handle(ButtonInteractionEvent event) {
+    public void onEvent(ButtonInteractionEvent event) {
         String id = event.getButton().getId();
         String index = id.substring(id.indexOf(":") + 1);
 
@@ -27,8 +34,7 @@ public class EmbedSupplier extends Interactive {
             case "REPLACE" -> page.supply();
             case "NEW" -> {
                 page.supply();
-                event.getChannel().sendMessageEmbeds(this.start()).setActionRows(Buttons.createDefaultSupplier())
-                        .queue(m -> Interactivity.addTask(m, this));
+                event.getChannel().sendMessage(this.start()).queue(m -> Interactivity.addTask(m, this));
                 end();
                 event.reply("Started new session").setEphemeral(true).queue();
                 return;

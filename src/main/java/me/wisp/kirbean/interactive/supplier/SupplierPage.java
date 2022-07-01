@@ -1,4 +1,4 @@
-package me.wisp.kirbean.interaction.supplier;
+package me.wisp.kirbean.interactivity.supplier;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -19,8 +19,8 @@ public class SupplierPage {
                 .setFooter(footer);
 
         this.supplier = supplier;
-        supply();
         isImage = true;
+        supply();
     }
 
     public SupplierPage(String title, Supplier<String> supplier, String footer, boolean isImage) {
