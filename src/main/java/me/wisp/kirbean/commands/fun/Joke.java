@@ -2,11 +2,11 @@ package me.wisp.kirbean.commands.fun;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import me.wisp.kirbean.api.HTTPClient;
-import me.wisp.kirbean.interaction.Interactivity;
-import me.wisp.kirbean.interaction.supplier.SupplierPage;
 import me.wisp.kirbean.framework.SlashCommand;
 import me.wisp.kirbean.framework.annotations.Command;
-import me.wisp.kirbean.interaction.supplier.EmbedSupplier;
+import me.wisp.kirbean.framework.interactivity.Interactivity;
+import me.wisp.kirbean.interactive.supplier.EmbedSupplier;
+import me.wisp.kirbean.interactive.supplier.SupplierPage;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 import java.net.URI;
@@ -17,7 +17,7 @@ public class Joke implements SlashCommand {
     @Command(name = "joke", description = "Fetches a joke, but don't worry, you will always be the biggest joke here.")
     public void execute(SlashCommandInteractionEvent event) {
         SupplierPage page = new SupplierPage("Joke", this::getJoke, "Did you get it?", false);
-        Interactivity.createSupplier(event, new EmbedSupplier(page));
+        Interactivity.createInteractive(event, new EmbedSupplier(page));
     }
 
     private String getJoke() {

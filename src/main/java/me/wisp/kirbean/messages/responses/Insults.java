@@ -1,4 +1,4 @@
-package me.wisp.kirbean.responses;
+package me.wisp.kirbean.messages.responses;
 
 import java.util.concurrent.ThreadLocalRandom;
 

@@ -1,4 +1,4 @@
-package me.wisp.kirbean.interactivity.supplier;
+package me.wisp.kirbean.interactive.supplier;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;

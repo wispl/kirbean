@@ -1,8 +1,8 @@
 package me.wisp.kirbean.commands.fun;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import me.wisp.kirbean.api.HTTPClient;
 import me.wisp.kirbean.api.GuildCache;
+import me.wisp.kirbean.api.HTTPClient;
 import me.wisp.kirbean.framework.SlashCommand;
 import me.wisp.kirbean.framework.annotations.Command;
 import me.wisp.kirbean.utils.Text;

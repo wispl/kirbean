@@ -19,19 +19,16 @@ public class AudioSender implements AudioSendHandler {
         this.frame.setBuffer(buffer);
     }
 
-    @Override
-    public boolean canProvide() {
+    @Override public boolean canProvide() {
         return player.provide(frame);
     }
 
-    @Override
-    public ByteBuffer provide20MsAudio() {
+    @Override public ByteBuffer provide20MsAudio() {
         ((Buffer) buffer).flip();
         return buffer;
     }
 
-    @Override
-    public boolean isOpus() {
+    @Override public boolean isOpus() {
         return true;
     }
 }

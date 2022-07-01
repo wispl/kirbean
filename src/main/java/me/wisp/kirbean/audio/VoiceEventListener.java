@@ -9,8 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class VoiceEventListener implements EventListener {
 
-    @Override
-    public void onEvent(@NotNull GenericEvent event) {
+    @Override public void onEvent(@NotNull GenericEvent event) {
         if (event instanceof GuildVoiceLeaveEvent) {
             onLeave((GuildVoiceLeaveEvent) event);
         } else if (event instanceof GuildVoiceJoinEvent) {

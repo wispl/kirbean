@@ -10,7 +10,9 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class CommandRepository {
 
@@ -54,9 +56,9 @@ public class CommandRepository {
         try {
             return (SlashCommand) c.getConstructors()[0].newInstance();
         } catch (InstantiationException | InvocationTargetException e) {
-            throw new RuntimeException("Error when constructing class " + c.getName());
+            throw new RuntimeException("Error when constructing class " + c.getName(), e);
         } catch (IllegalAccessException e) {
-            throw new RuntimeException("Could no access constructor of " + c.getName());
+            throw new RuntimeException("Could no access constructor of " + c.getName(), e);
         }
     }
 

@@ -1,14 +1,14 @@
 package me.wisp.kirbean.commands.music;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import me.wisp.kirbean.audio.player.GuildPlayer;
 import me.wisp.kirbean.audio.PlayerRepository;
+import me.wisp.kirbean.audio.player.GuildPlayer;
 import me.wisp.kirbean.audio.tracks.UserInfo;
 import me.wisp.kirbean.framework.SlashCommand;
 import me.wisp.kirbean.framework.annotations.Command;
-import me.wisp.kirbean.interaction.Interactivity;
-import me.wisp.kirbean.interaction.voting.Vote;
-import me.wisp.kirbean.interaction.voting.VotePage;
+import me.wisp.kirbean.framework.interactivity.Interactivity;
+import me.wisp.kirbean.interactive.vote.Vote;
+import me.wisp.kirbean.interactive.vote.VotePage;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
@@ -48,7 +48,7 @@ public class Skip implements SlashCommand {
             event.getHook().sendMessage("The track has already ended").queue();
         });
 
-        Interactivity.createVote(event, vote);
+        Interactivity.createInteractive(event, vote);
     }
 
     private int getVoteGoal(int memberCount) {

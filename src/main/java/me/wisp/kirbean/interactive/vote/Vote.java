@@ -1,4 +1,4 @@
-package me.wisp.kirbean.interactive.voting;
+package me.wisp.kirbean.interactive.vote;
 
 import me.wisp.kirbean.framework.interactivity.Interactive;
 import net.dv8tion.jda.api.MessageBuilder;

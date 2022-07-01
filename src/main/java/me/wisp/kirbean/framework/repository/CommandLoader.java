@@ -2,31 +2,36 @@ package me.wisp.kirbean.framework.repository;
 
 import me.wisp.kirbean.framework.SlashCommand;
 
-import java.io.*;
-import java.net.URL;
-import java.nio.file.*;
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
+// scans packageName for SlashCommand, may replace with either ClassGraph, Spring, or ClassIndex later
 public class CommandLoader {
     public CommandLoader() {};
 
     public List<? extends Class<?>> getClasses(String packageName) {
         String packagePath = packageName.replace('.', File.separatorChar);
         ClassLoader loader = ClassLoader.getSystemClassLoader();
+        URI uri = getResource(loader, packagePath);
 
-        URL url = loader.getResource(packagePath);
-        if (url == null) throw new RuntimeException("No resource found for " + packageName);
-        String path = url.getPath();
-
-        Path root = Path.of(path);
-        if (path.startsWith("jar:")) {
+        Path root;
+        if (uri.toString().startsWith("jar:")) {
             try {
-                root = FileSystems.newFileSystem(root).getPath(packagePath);
+                root = FileSystems.newFileSystem(uri, Collections.emptyMap()).getPath(packagePath);
             } catch (IOException e) {
-                throw new RuntimeException("Could not create filesystem for jar");
+                throw new RuntimeException("Could not create file system for jar", e);
             }
+        } else {
+            root = Path.of(uri);
         }
 
         List<Class<?>> classes = new ArrayList<>();
@@ -43,6 +48,14 @@ public class CommandLoader {
             throw new RuntimeException("Error walking files");
         }
         return classes;
+    }
+
+    private URI getResource(ClassLoader loader, String packageName) {
+        try {
+            return loader.getResource(packageName).toURI();
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(packageName + "cannot be converted to URI", e);
+        }
     }
 
     private String getClassPath(String file, String packagePath) {

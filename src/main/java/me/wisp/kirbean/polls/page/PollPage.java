@@ -1,4 +1,4 @@
-package me.wisp.kirbean.polls;
+package me.wisp.kirbean.polls.page;
 
 public class PollPage {
 

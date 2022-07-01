@@ -1,12 +1,12 @@
 package me.wisp.kirbean.commands.music;
 
-import me.wisp.kirbean.audio.player.GuildPlayer;
 import me.wisp.kirbean.audio.PlayerRepository;
-import me.wisp.kirbean.interaction.Interactivity;
-import me.wisp.kirbean.interaction.pagination.Paginator;
-import me.wisp.kirbean.interaction.pagination.impl.SimplePages;
+import me.wisp.kirbean.audio.player.GuildPlayer;
 import me.wisp.kirbean.framework.SlashCommand;
 import me.wisp.kirbean.framework.annotations.Command;
+import me.wisp.kirbean.framework.interactivity.Interactivity;
+import me.wisp.kirbean.interactive.paginator.Paginator;
+import me.wisp.kirbean.interactive.paginator.impl.SimplePages;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 public class Queue implements SlashCommand {
@@ -19,6 +19,6 @@ public class Queue implements SlashCommand {
         }
 
         SimplePages pages = new SimplePages("Currently playing " + player.getCurrent().getInfo().title, player.getQueue());
-        Interactivity.createPaginator(event, new Paginator(pages));
+        Interactivity.createInteractive(event, new Paginator(pages));
     }
 }

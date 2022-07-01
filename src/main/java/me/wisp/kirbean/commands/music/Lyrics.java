@@ -1,14 +1,14 @@
 package me.wisp.kirbean.commands.music;
 
+import me.wisp.kirbean.audio.PlayerRepository;
+import me.wisp.kirbean.audio.lyrics.LyricsClient;
 import me.wisp.kirbean.audio.lyrics.LyricsData;
 import me.wisp.kirbean.audio.player.GuildPlayer;
-import me.wisp.kirbean.audio.lyrics.LyricsClient;
-import me.wisp.kirbean.audio.PlayerRepository;
 import me.wisp.kirbean.framework.SlashCommand;
 import me.wisp.kirbean.framework.annotations.Command;
-import me.wisp.kirbean.interaction.Interactivity;
-import me.wisp.kirbean.interaction.pagination.Paginator;
-import me.wisp.kirbean.interaction.pagination.impl.SimplePages;
+import me.wisp.kirbean.framework.interactivity.Interactivity;
+import me.wisp.kirbean.interactive.paginator.Paginator;
+import me.wisp.kirbean.interactive.paginator.impl.SimplePages;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 import java.util.concurrent.ExecutionException;
@@ -25,8 +25,7 @@ public class Lyrics implements SlashCommand {
         }
 
         String title = player.getCurrent().getInfo().title;
-        LyricsData data = null;
-
+        LyricsData data;
         try {
             data = client.getLyrics(title).get();
         } catch (ExecutionException | InterruptedException e) {
@@ -35,6 +34,6 @@ public class Lyrics implements SlashCommand {
         }
 
         SimplePages pages = new SimplePages(data.author(), data.title(), data.url(), data.lyrics());
-        Interactivity.createPaginator(event, new Paginator(pages));
+        Interactivity.createInteractive(event, new Paginator(pages));
     }
 }

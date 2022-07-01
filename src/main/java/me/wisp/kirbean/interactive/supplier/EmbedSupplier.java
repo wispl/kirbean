@@ -1,14 +1,14 @@
-package me.wisp.kirbean.interactivity.supplier;
+package me.wisp.kirbean.interactive.supplier;
 
-import me.wisp.kirbean.interactivity.Interactive;
-import me.wisp.kirbean.interactivity.Interactivity;
+import me.wisp.kirbean.framework.interactivity.Interactive;
+import me.wisp.kirbean.framework.interactivity.Interactivity;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
-public class EmbedSupplier extends Interactive {
+public class EmbedSupplier implements Interactive {
     private final SupplierPage page;
     private static final ActionRow BUTTONS = ActionRow.of(
             Button.danger("supplier:CANCEL", "CANCEL"),
@@ -20,32 +20,32 @@ public class EmbedSupplier extends Interactive {
         this.page = page;
     }
 
-    @Override
-    public Message start() {
+    @Override public Message start() {
         return new MessageBuilder().setEmbeds(page.renderPage()).setActionRows(BUTTONS).build();
     }
 
-    @Override
-    public void onEvent(ButtonInteractionEvent event) {
-        String id = event.getButton().getId();
-        String index = id.substring(id.indexOf(":") + 1);
-
-        switch (index) {
-            case "REPLACE" -> page.supply();
-            case "NEW" -> {
-                page.supply();
-                event.getChannel().sendMessage(this.start()).queue(m -> Interactivity.addTask(m, this));
-                end();
-                event.reply("Started new session").setEphemeral(true).queue();
-                return;
-            }
-            case "CANCEL" -> {
-                end();
-                event.reply("Ending session").setEphemeral(true).queue();
-                return;
-            }
+    @Override public void onEvent(ButtonInteractionEvent event) {
+        page.supply();
+        switch (event.getButton().getId()) {
+            case "supplier:REPLACE" -> event.editMessageEmbeds(page.renderPage()).queue();
+            case "supplier:NEW" -> startNewSession(event);
+            case "supplier:CANCEL" -> end(event);
         }
+    }
 
-        event.editMessageEmbeds(page.renderPage()).queue();
+    private void startNewSession(ButtonInteractionEvent event) {
+        Interactivity.createInteractive(event.getTextChannel(), this);
+        end(event);
+    }
+
+    private void end(ButtonInteractionEvent event) {
+        event.deferEdit()
+                .setActionRows(
+                        event.getMessage()
+                                .getActionRows()
+                                .stream()
+                                .map(ActionRow::asDisabled)
+                                .toList())
+                .queue();
     }
 }

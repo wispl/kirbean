@@ -3,6 +3,7 @@ package me.wisp.kirbean.framework.reflect;
 import me.wisp.kirbean.framework.annotations.Choices;
 import me.wisp.kirbean.framework.annotations.Command;
 import me.wisp.kirbean.framework.annotations.Option;
+import me.wisp.kirbean.framework.annotations.Options;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
@@ -18,11 +19,19 @@ public record CommandInfo(String name, String description, boolean isSubcommand,
         List<OptionInfo> parameterDefinitions = new ArrayList<>();
 
         for (Annotation annotation : method.getDeclaredAnnotations()) {
-            if (annotation instanceof Choices) {
-                parameterDefinitions.add(OptionInfo.build((Choices) annotation));
-            }
-            else if (annotation instanceof Option) {
-                parameterDefinitions.add(OptionInfo.build((Option) annotation));
+            if (annotation instanceof Choices choices) {
+                parameterDefinitions.add(OptionInfo.build(choices));
+            } else if (annotation instanceof Option option) {
+                parameterDefinitions.add(OptionInfo.build(option));
+            } else if (annotation instanceof Options options) {
+                for (Annotation a : options.value()) {
+                    if (a instanceof Choices choices) {
+                        parameterDefinitions.add(OptionInfo.build(choices));
+                    }
+                    else if (a instanceof Option option) {
+                        parameterDefinitions.add(OptionInfo.build(option));
+                    }
+                }
             }
         }
 
@@ -46,5 +55,4 @@ public record CommandInfo(String name, String description, boolean isSubcommand,
                         .map(OptionInfo::toData)
                         .toList());
     }
-
 }

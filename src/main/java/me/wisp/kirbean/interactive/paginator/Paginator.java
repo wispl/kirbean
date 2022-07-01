@@ -1,4 +1,4 @@
-package me.wisp.kirbean.interactive.pagination;
+package me.wisp.kirbean.interactive.paginator;
 
 import me.wisp.kirbean.framework.interactivity.Interactive;
 import net.dv8tion.jda.api.MessageBuilder;

@@ -1,5 +1,7 @@
 package me.wisp.kirbean.utils;
 
+import java.util.concurrent.TimeUnit;
+
 public class Time {
 
     public static String formatTime(long duration) {
@@ -17,5 +19,9 @@ public class Time {
             bar.append(n <= (int) (percentage*10) ? "▇" : "—");
         }
         return bar.toString();
+    }
+
+    public static long convertToMillis(long time, TimeUnit unit) {
+        return unit.toMillis(time);
     }
 }

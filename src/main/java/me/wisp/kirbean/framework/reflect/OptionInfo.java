@@ -28,7 +28,7 @@ public record OptionInfo(OptionType type, String name, String description, boole
     }
 
     public OptionData toData() {
-        OptionData data = new OptionData(type, name, description).setRequired(isRequired);
+        OptionData data = new OptionData(type, name, description, isRequired);
         if (choices != null) {
             for (String choice : choices) {
                 data.addChoice(choice, choice);

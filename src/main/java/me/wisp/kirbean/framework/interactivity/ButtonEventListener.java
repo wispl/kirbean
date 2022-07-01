@@ -1,18 +1,15 @@
-package me.wisp.kirbean.interactivity;
+package me.wisp.kirbean.framework.interactivity;
 
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.ShutdownEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.EventListener;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.*;
 
 public class ButtonEventListener implements EventListener {
-    private static final Logger logger = LoggerFactory.getLogger(ButtonEventListener.class);
-    private final ConcurrentHashMap<Long, Interactive> pages = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Long, ExpiringKey> pages = new ConcurrentHashMap<>();
 
     // avoids the value having a reference to the key
     private final BlockingQueue<Long> expiringQueue = new PriorityBlockingQueue<>(10,
@@ -31,38 +28,35 @@ public class ButtonEventListener implements EventListener {
     }
 
     private void purge() {
-        Long messageId = expiringQueue.peek();
-        while (messageId != null && System.currentTimeMillis() - pages.get(messageId).getLastInteraction() >= 60000) {
+        Long id = expiringQueue.peek();
+        while (id != null && pages.get(id).isExpired()) {
             expiringQueue.poll();
-            pages.remove(messageId).end();
+            pages.remove(id).end();
 
-            messageId = expiringQueue.peek();
+            id = expiringQueue.peek();
         }
     }
 
     @Override
     public void onEvent(@NotNull GenericEvent event) {
         if (event instanceof ButtonInteractionEvent buttonEvent) {
-            process(buttonEvent);
+            ExpiringKey key = getKey(buttonEvent.getMessageIdLong());
+            if (key == null) {
+                return;
+            }
+            key.getInteractive().onEvent(buttonEvent);
+            key.renew();
         } else if (event instanceof ShutdownEvent) {
             service.shutdown();
         }
     }
 
-    private void process(ButtonInteractionEvent event) {
-        Interactive interactive = pages.get(event.getMessageIdLong());
-        if (interactive != null) {
-            try {
-                interactive.renew();
-                interactive.onEvent(event);
-            } catch (Exception e) {
-                logger.warn(e.getMessage());
-            }
-        }
+    private ExpiringKey getKey(long id) {
+        return pages.get(id);
     }
 
-    public void add(Long id, Interactive interactive) {
-        pages.put(id, interactive);
+    public void add(Long id, ExpiringKey key) {
+        pages.put(id, key);
         expiringQueue.add(id);
     }
 }

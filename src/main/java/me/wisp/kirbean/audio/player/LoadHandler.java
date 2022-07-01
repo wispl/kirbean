@@ -4,7 +4,6 @@ import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import me.wisp.kirbean.audio.player.GuildPlayer;
 import me.wisp.kirbean.audio.tracks.UserInfo;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
@@ -22,14 +21,12 @@ public class LoadHandler implements AudioLoadResultHandler {
         player.enqueue(track);
     }
 
-    @Override
-    public void trackLoaded(AudioTrack track) {
+    @Override public void trackLoaded(AudioTrack track) {
         load(track);
         event.reply("Loaded **" + track.getInfo().title + "** by " + track.getInfo().author).queue();
     }
 
-    @Override
-    public void playlistLoaded(AudioPlaylist playlist) {
+    @Override public void playlistLoaded(AudioPlaylist playlist) {
         if (playlist.getTracks().size() == 0) {
             event.reply("Playlist is empty or could not be loaded").queue();
             return;
@@ -47,13 +44,11 @@ public class LoadHandler implements AudioLoadResultHandler {
         }
     }
 
-    @Override
-    public void noMatches() {
+    @Override public void noMatches() {
         event.reply("Nothing found for query: " + query).setEphemeral(true).queue();
     }
 
-    @Override
-    public void loadFailed(FriendlyException exception) {
+    @Override public void loadFailed(FriendlyException exception) {
         event.reply("Unable to load requested query due to error: " + exception).setEphemeral(true).queue();
     }
 }

@@ -15,8 +15,16 @@ import java.util.concurrent.ScheduledExecutorService;
 public class CommandDispatcher {
     private final Logger logger = LoggerFactory.getLogger(CommandDispatcher.class);
     private final Map<String, SlashCommand> commands;
-    public final HelpMessageFactory help;
-    private final ScheduledExecutorService pool = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors() + 1);
+    private final HelpMessageFactory help;
+    private final ScheduledExecutorService pool = Executors.newScheduledThreadPool(
+            Runtime.getRuntime().availableProcessors() + 1,
+             r -> {
+                Thread thread = new Thread(r);
+                thread.setDaemon(false);
+                thread.setUncaughtExceptionHandler((t, e) -> logger.warn("Exception in thread" + t.getName() + "': ", e));
+                thread.setName("Command Pool " + thread.getName());
+                return thread;
+             });
 
     public CommandDispatcher(CommandRepository repository) {
         this.commands = repository.asMap();
@@ -36,8 +44,7 @@ public class CommandDispatcher {
             try {
                 command.execute(event);
             } catch (Throwable e) {
-                logger.warn("Error message: " + e.getMessage());
-                //System.out.println(Arrays.toString(e.getStackTrace()));
+                logger.warn("Error message: " + e.getMessage(), e);
             }
         });
     }

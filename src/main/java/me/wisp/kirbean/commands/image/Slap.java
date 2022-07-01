@@ -3,32 +3,29 @@ package me.wisp.kirbean.commands.image;
 import me.wisp.kirbean.framework.SlashCommand;
 import me.wisp.kirbean.framework.annotations.Command;
 import me.wisp.kirbean.framework.annotations.Option;
-import me.wisp.kirbean.utils.Image;
+import me.wisp.kirbean.image.Coordinate;
+import me.wisp.kirbean.image.MutableImage;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 
-import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
 
 public class Slap implements SlashCommand {
 
-    private static final BufferedImage SLAP = Image.fromFile(new File("src/main/java/me/wisp/kirbean/assets/slap.jpg"));
+    private static final BufferedImage SLAP = MutableImage.getImageFromFile("images/slap.jpg");
+    private static final Coordinate AVATAR = new Coordinate(270, 180);
+    private static final Coordinate USER_AVATAR = new Coordinate(720, 85);
 
     @Command(name = "slap", description = "Slaps someone for being a blabbering baboon")
     @Option(name = "user", description = "the idiot to slap", type = OptionType.USER)
     public void execute(SlashCommandInteractionEvent event) {
-        BufferedImage image = Image.clone(SLAP);
-        BufferedImage avatar = Image.fromURL(event.getOption("user").getAsMember().getEffectiveAvatarUrl());
-        avatar = Image.round(Image.scale(avatar, 3));
-        BufferedImage userAvatar = Image.fromURL(event.getMember().getEffectiveAvatarUrl());
-        userAvatar = Image.round(Image.scale(userAvatar, 2));
+        MutableImage image = new MutableImage(SLAP);
+        MutableImage avatar = new MutableImage(event.getOption("user").getAsMember().getEffectiveAvatarUrl());
+        MutableImage userAvatar = new MutableImage(event.getMember().getEffectiveAvatarUrl());
 
-        Graphics2D graphics = image.createGraphics();
-        graphics.drawImage(avatar, 270, 180, null);
-        graphics.drawImage(userAvatar, 720, 85, null);
-        graphics.dispose();
+        image.drawImage(avatar.setScale(3).setRound(), AVATAR);
+        image.drawImage(userAvatar.setScale(2).setRound(), USER_AVATAR);
 
-        event.replyFile(Image.asByteArrayStream(image, "jpg"), "slap.jpg").queue();
+        event.replyFile(image.asInputStream("jpg"), "slap.jpg").queue();
     }
 }

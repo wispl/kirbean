@@ -1,5 +1,7 @@
-package me.wisp.kirbean.polls;
+package me.wisp.kirbean.polls.impl;
 
+import me.wisp.kirbean.polls.Poll;
+import me.wisp.kirbean.polls.page.PollPage;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Message;

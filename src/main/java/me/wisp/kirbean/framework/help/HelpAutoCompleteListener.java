@@ -16,8 +16,7 @@ public class HelpAutoCompleteListener implements EventListener {
         this.options = options;
     }
 
-    @Override
-    public void onEvent(@NotNull GenericEvent event) {
+    @Override public void onEvent(@NotNull GenericEvent event) {
         if (event instanceof CommandAutoCompleteInteractionEvent auto) {
             if (auto.getName().equals("help")) {
                 auto.replyChoices(options.stream().filter(o -> o.startsWith(auto.getFocusedOption().getValue()))

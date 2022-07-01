@@ -138,8 +138,7 @@ public class GuildPlayer extends AudioEventAdapter {
         return queue.getLoop();
     }
 
-    @Override
-    public void onTrackStart(AudioPlayer player, AudioTrack track) {
+    @Override public void onTrackStart(AudioPlayer player, AudioTrack track) {
         guild.getTextChannelById(messageChannelId).sendMessageEmbeds(getNowPlaying()).queue();
     }
 
@@ -166,8 +165,7 @@ public class GuildPlayer extends AudioEventAdapter {
                 .setThumbnail("https://img.youtube.com/vi/" + trackInfo.identifier + "/mqdefault.jpg");
     }
 
-    @Override
-    public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason reason) {
+    @Override public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason reason) {
         if (reason.mayStartNext) {
             nextTrack();
         }

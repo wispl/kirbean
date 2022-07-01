@@ -12,12 +12,8 @@ public class SlashInteractionEventListener implements EventListener {
         this.dispatcher = dispatcher;
     }
 
-    @Override
-    public void onEvent(@NotNull GenericEvent event) {
+    @Override public void onEvent(@NotNull GenericEvent event) {
         if (event instanceof SlashCommandInteractionEvent slashEvent) {
-            if (!slashEvent.isFromGuild()) {
-                slashEvent.reply("Get out of my DMs idiot...").queue();
-            }
             dispatcher.dispatchCommand(slashEvent);
         }
     }

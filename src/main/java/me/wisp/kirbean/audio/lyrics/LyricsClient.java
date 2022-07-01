@@ -21,11 +21,11 @@ public class LyricsClient {
         return CompletableFuture.supplyAsync(() -> {
             String url = getPageUrl(search);
             Connection connection = Jsoup.connect(url).userAgent(USER_AGENT);
-            Document document = null;
+            Document document;
             try {
                 document = connection.get();
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException("Could not get document for query: " + search, e);
             }
 
             return new LyricsData(

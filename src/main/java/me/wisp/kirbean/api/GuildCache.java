@@ -25,7 +25,7 @@ public class GuildCache {
         return response;
     }
 
-    public ArrayDeque<JsonNode> getCache(long guildid) {
-        return cache.computeIfAbsent(guildid, id -> supplier.get());
+    public ArrayDeque<JsonNode> getCache(long guildId) {
+        return cache.computeIfAbsent(guildId, id -> supplier.get());
     }
 }

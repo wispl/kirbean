@@ -1,20 +1,53 @@
 package me.wisp.kirbean.commands.utility;
 
 import me.wisp.kirbean.framework.SlashCommand;
+import me.wisp.kirbean.framework.annotations.Choices;
 import me.wisp.kirbean.framework.annotations.Command;
 import me.wisp.kirbean.framework.annotations.Option;
-import me.wisp.kirbean.interaction.Interactivity;
-import me.wisp.kirbean.interaction.voting.Vote;
-import me.wisp.kirbean.interaction.voting.VotePage;
+import me.wisp.kirbean.framework.collector.Collector;
+import me.wisp.kirbean.polls.page.PollPage;
+import me.wisp.kirbean.polls.Polls;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.components.Modal;
+import net.dv8tion.jda.api.interactions.components.text.TextInput;
+import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
+
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 public class Poll implements SlashCommand {
+    private static final Modal MODAL = Modal.create("poll:modal", "Poll Creation")
+            .addActionRow(
+                    TextInput.create("poll:modal:title", "Title", TextInputStyle.SHORT)
+                            .setRequired(true)
+                            .build())
+            .addActionRow(
+                    TextInput.create("poll:modal:question", "Question", TextInputStyle.PARAGRAPH)
+                            .setRequired(true)
+                            .build())
+            .build();
     @Command(name = "poll", description = "Does a poll")
-    @Option(name = "question", description = "poll question to ask")
+    @Option(name = "duration", description = "duration of the poll", type = OptionType.INTEGER)
+    @Choices(name = "unit", description = "unit of time", choices = {"minutes", "hours", "days"})
     public void execute(SlashCommandInteractionEvent event) {
-        VotePage page = new VotePage(event.getMember().getEffectiveName() + " created a poll!",
-                "```\n" + event.getOption("name").getAsString() + "\n```",
-                Integer.MAX_VALUE); // for now
-        Interactivity.createVote(event, new Vote((m) -> true, page, () -> event.getHook().sendMessage("yay!").queue()));
+        List<String> responses;
+        try {
+            responses = Collector.createModal(event, MODAL).get();
+        } catch (InterruptedException | ExecutionException e) {
+            event.reply("Error creating poll").setEphemeral(true).queue();
+            return;
+        }
+
+        String title = responses.get(0);
+        String question = responses.get(1);
+        int duration = event.getOption("duration").getAsInt();
+        TimeUnit unit = TimeUnit.valueOf(event.getOption("unit").getAsString().toUpperCase());
+        Member member = event.getMember();
+        PollPage page = new PollPage(member.getEffectiveName(), member.getEffectiveAvatarUrl(), title, question);
+
+        Polls.createPoll(event.getTextChannel(), page, duration, unit);
     }
 }

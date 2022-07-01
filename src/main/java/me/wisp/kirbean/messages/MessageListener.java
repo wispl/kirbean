@@ -1,7 +1,7 @@
-package me.wisp.kirbean.events;
+package me.wisp.kirbean.messages;
 
-import me.wisp.kirbean.responses.Compliments;
-import me.wisp.kirbean.responses.Insults;
+import me.wisp.kirbean.messages.responses.Compliments;
+import me.wisp.kirbean.messages.responses.Insults;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -20,21 +20,24 @@ public class MessageListener implements EventListener {
     // I am hungry -> Hello hungry, I am dad
     private static final Pattern DAD_JOKE = Pattern.compile("\\b(i am|i m|iam|im|i'm|i’m)\\b", Pattern.CASE_INSENSITIVE);
     private static final Pattern SHUT_UP = Pattern.compile("stfu|shut up|be quiet|silence", Pattern.CASE_INSENSITIVE);
-    private static final Pattern OUR = Pattern.compile("our", Pattern.CASE_INSENSITIVE);
+    // private static final Pattern OUR = Pattern.compile("our", Pattern.CASE_INSENSITIVE);
     private static final Pattern INSULTING = Pattern.compile("\\b(dumbass|stupid|fucking|idiot|useless|)+\\b(bot|kirbean)", Pattern.CASE_INSENSITIVE);
 
     @Override public void onEvent(@NotNull GenericEvent event) {
         if (event instanceof MessageReceivedEvent messageEvent) {
-            if (messageEvent.getMember().getUser().isBot()) { return; }
+            if (messageEvent.getMember().getUser().isBot()) {
+                return;
+            }
+
             Message message = messageEvent.getMessage();
             String content = message.getContentDisplay();
 
             handleDadJoke(content, message);
 
-            if (content.toLowerCase().contains("my")) {
-                message.reply(OUR.matcher(content).replaceAll("*OUR*")).queue();
-                return;
-            } else if (SHUT_UP.matcher(content).find()) {
+//            if (content.toLowerCase().contains("my")) {
+//                message.reply(OUR.matcher(content).replaceAll("*OUR*")).queue();
+//                return;
+            if (SHUT_UP.matcher(content).find()) {
                 message.reply("Freedom of speech bozo").queue();
                 return;
             } else if (INSULTING.matcher(content).find()) {
