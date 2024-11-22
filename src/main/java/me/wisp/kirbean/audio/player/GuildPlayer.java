@@ -6,36 +6,76 @@ import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
-import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
-import me.wisp.kirbean.audio.tracks.TrackQueue;
-import me.wisp.kirbean.audio.tracks.UserInfo;
-import me.wisp.kirbean.utils.Time;
+import com.sedmelluq.discord.lavaplayer.track.playback.MutableAudioFrame;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.AudioChannel;
-import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.audio.AudioSendHandler;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 
-import java.util.List;
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
+import java.time.Duration;
+import java.util.Queue;
 
-public class GuildPlayer extends AudioEventAdapter {
+public class GuildPlayer extends AudioEventAdapter implements AudioSendHandler {
     private final DefaultAudioPlayerManager manager;
     private final AudioPlayer player;
     private final TrackQueue queue;
 
-    private final Guild guild;
+    private final ByteBuffer buffer;
+    private final MutableAudioFrame frame;
 
     private long voiceChannelId = -1;
-    private long messageChannelId = -1;
+    private MessageChannel broadcastChannel;
 
-
-    public GuildPlayer(Guild guild, DefaultAudioPlayerManager manager, AudioPlayer player) {
+    public GuildPlayer(DefaultAudioPlayerManager manager) {
         this.manager = manager;
-        this.player = player;
+        this.player = manager.createPlayer();
         this.queue = new TrackQueue();
-        this.guild = guild;
-
-        guild.getAudioManager().setSendingHandler(new AudioSender(player));
         player.addListener(this);
+
+        this.frame =  new MutableAudioFrame();
+        this.buffer = ByteBuffer.allocate(1024);
+        frame.setBuffer(buffer);
+    }
+
+    @Override
+    public void onTrackEnd(AudioPlayer player,
+                           AudioTrack track,
+                           AudioTrackEndReason reason)
+    {
+        if (reason.mayStartNext) {
+            nextTrack();
+        }
+    }
+
+    @Override
+    public void onTrackStart(AudioPlayer player, AudioTrack track) {
+        AudioTrack current = player.getPlayingTrack();
+        String time = Duration.ofMillis(current.getDuration()).toString();
+        MessageEmbed embed = new EmbedBuilder()
+                .setTitle("Started Playing")
+                .setDescription("```\n" + current.getInfo().title + "\n```")
+                .addField("Requested by", current.getUserData().toString(), false)
+                .addField("Of length", time, false)
+                .build();
+        broadcastChannel.sendMessageEmbeds(embed).queue();
+    }
+
+    @Override
+    public boolean canProvide() {
+        return player.provide(frame);
+    }
+
+    @Override
+    public ByteBuffer provide20MsAudio() {
+        ((Buffer) buffer).flip();
+        return buffer;
+    }
+
+    @Override
+    public boolean isOpus() {
+        return true;
     }
 
     public void play(String query, AudioLoadResultHandler handler) {
@@ -43,7 +83,7 @@ public class GuildPlayer extends AudioEventAdapter {
     }
 
     public void reset() {
-        messageChannelId = -1;
+        broadcastChannel = null;
         voiceChannelId = -1;
         player.stopTrack();
         queue.clear();
@@ -60,24 +100,9 @@ public class GuildPlayer extends AudioEventAdapter {
     public boolean isQueueEmpty() {
         return queue.isEmpty();
     }
-    public void join(AudioChannel channel)  {
-        resume();
-        guild.getAudioManager().openAudioConnection(channel);
-        voiceChannelId = channel.getIdLong();
-    }
 
-    public void leave() {
-        if (!isInVoiceChannel()) {
-            return;
-        }
-
-        pause();
-        guild.getAudioManager().closeAudioConnection();
-        voiceChannelId = -1;
-    }
-
-    public void setMessageChannelId(long id) {
-        this.messageChannelId = id;
+    public void setBroadcastChannel(MessageChannel channel) {
+        broadcastChannel = channel;
     }
 
     public boolean isInVoiceChannel() {
@@ -86,14 +111,6 @@ public class GuildPlayer extends AudioEventAdapter {
 
     public long getVoiceChannel() {
         return voiceChannelId;
-    }
-
-    public int membersInVoiceChannel() {
-        return (int) guild.getVoiceChannelById(getVoiceChannel())
-                .getMembers()
-                .stream()
-                .filter(m -> !m.getUser().isBot())
-                .count();
     }
 
     public void enqueue(AudioTrack track) {
@@ -118,7 +135,7 @@ public class GuildPlayer extends AudioEventAdapter {
         player.startTrack(queue.provideTrack(), false);
     }
 
-    public List<String> getQueue() {
+    public Queue<AudioTrack> getQueue() {
         return queue.getQueue();
     }
 
@@ -136,38 +153,5 @@ public class GuildPlayer extends AudioEventAdapter {
 
     public boolean getLoop() {
         return queue.getLoop();
-    }
-
-    @Override public void onTrackStart(AudioPlayer player, AudioTrack track) {
-        guild.getTextChannelById(messageChannelId).sendMessageEmbeds(getNowPlaying()).queue();
-    }
-
-    public MessageEmbed getNowPlaying() {
-        AudioTrack current = player.getPlayingTrack();
-
-        long position = current.getPosition();
-        long duration = current.getDuration();
-        String time = "[" + Time.formatTime(position) + "/" + Time.formatTime(duration) + "]\n";
-
-        EmbedBuilder eb = getTrackInfo(current);
-        eb.setTitle("Now Playing...");
-        eb.addField("**Progress**", time + Time.progressbar((double) position/duration), false);
-        return eb.build();
-    }
-
-    public EmbedBuilder getTrackInfo(AudioTrack track) {
-        AudioTrackInfo trackInfo = track.getInfo();
-        return new EmbedBuilder()
-                .addField("**Title:**", "```\n" + trackInfo.title+ "\n```", false)
-                .addField("**Requester:**", ((UserInfo) track.getUserData()).getRequester(), true)
-                .addField("**Source:**", "[Click](" + trackInfo.uri + ")", true)
-                .addField("**Author:**", trackInfo.author, true)
-                .setThumbnail("https://img.youtube.com/vi/" + trackInfo.identifier + "/mqdefault.jpg");
-    }
-
-    @Override public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason reason) {
-        if (reason.mayStartNext) {
-            nextTrack();
-        }
     }
 }

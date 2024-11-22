@@ -1,53 +1,90 @@
 package me.wisp.kirbean.commands.utility;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import me.wisp.kirbean.api.HTTPClient;
-import me.wisp.kirbean.framework.SlashCommand;
-import me.wisp.kirbean.framework.annotations.Command;
-import me.wisp.kirbean.framework.annotations.Option;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectReader;
+import me.wisp.kirbean.core.SlashCommand;
+import me.wisp.kirbean.core.annotations.Command;
+import me.wisp.kirbean.core.annotations.Option;
+import me.wisp.kirbean.utils.Http;
+import me.wisp.kirbean.utils.Json;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import okhttp3.HttpUrl;
+import okhttp3.Request;
 
 public class Define implements SlashCommand {
-    private static final String DEFINE = "https://api.dictionaryapi.dev/api/v2/entries/en/";
+    private static final String URL = "https://api.dictionaryapi.dev/api/v2/entries/en/";
+    private static final ObjectReader reader = Json.readerFor(DefinitionResult.class);
 
     @Command(name = "define", description = "Looks up a word in the dictionary")
     @Option(name = "word", description = "word to look up")
     public void execute(SlashCommandInteractionEvent event) {
-        String word = event.getOption("word").getAsString().toLowerCase();
-        JsonNode data = HTTPClient.getWithQuery(DEFINE, word);
+        var word = event.getOption("word").getAsString().toLowerCase();
+        var url = HttpUrl.parse(URL).newBuilder()
+                .addEncodedPathSegment(word).build();
+        var request = new Request.Builder().url(url).build();
+        String data = Http.execute(event.getJDA(), request);
+        if (data == null) {
+            event.reply("An error has occured...").setEphemeral(true).queue();
+            return;
+        }
 
-        if (!data.has(0)) {
+        DefinitionResult result;
+        try {
+            result = reader.readValue(data);
+        } catch (JsonProcessingException e) {
+            event.reply("An error has occured...").setEphemeral(true).queue();
+            return;
+        }
+
+        if (result.meanings.length == 0) {
             event.reply("No definitions found for word " + word).queue();
             return;
         }
-        data = data.get(0);
 
-        EmbedBuilder builder = new EmbedBuilder()
-                .setTitle(word)
-                .addField("phonetics", parsePhonetics(data), false);
+        var builder = new EmbedBuilder()
+                .setTitle(result.word)
+                .addField("origin", result.origin, false)
+                .addField("phonetics", result.phonetics, false);
 
-        for (JsonNode node : data.withArray("meanings")) {
-            builder.addField(node.get("partOfSpeech").asText(), parseMeanings(node.withArray("definitions")), false);
+        for (DefinitionResult.Meaning meaning : result.meanings) {
+            builder.addField(meaning.partOfSpeech, parseDefinitions(meaning.definitions), false);
         }
 
         event.replyEmbeds(builder.build()).queue();
     }
 
-    private String parsePhonetics(JsonNode data) {
-        return String.join(", ", data.get("phonetics").findValuesAsText("text"));
+    private String parseDefinitions(DefinitionResult.Definition definitions[]) {
+        var builder = new StringBuilder();
+        for (DefinitionResult.Definition definition : definitions) {
+            builder.append("```\n•")
+                    .append(definition.definition)
+                    .append('\n')
+                    .append("\t")
+                    .append(definition.example)
+                    .append("\n```");
+        }
+        return builder.toString();
     }
 
-    private String parseMeanings(ArrayNode definition) {
-        StringBuilder definitions = new StringBuilder();
-        for (JsonNode node : definition) {
-            definitions.append("```\n•").append(node.get("definition").asText()).append('\n');
-            if (node.has("example")) {
-                   definitions.append('\t').append(node.get("example").asText());
-            }
-            definitions.append("\n```");
+    private static class DefinitionResult {
+        public String word;
+        public String phonetics;
+        public String origin;
+
+        public Meaning[] meanings;
+
+        private static class Meaning {
+            public String partOfSpeech;
+            public Definition[] definitions;
+
         }
-        return definitions.toString();
+
+        private static class Definition {
+            public String definition;
+            public String example;
+            public String[] synonyms;
+            public String[] antonyms;
+        }
     }
 }

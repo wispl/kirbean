@@ -1,7 +1,7 @@
 package me.wisp.kirbean.commands.utility;
 
-import me.wisp.kirbean.framework.SlashCommand;
-import me.wisp.kirbean.framework.annotations.Command;
+import me.wisp.kirbean.core.SlashCommand;
+import me.wisp.kirbean.core.annotations.Command;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 

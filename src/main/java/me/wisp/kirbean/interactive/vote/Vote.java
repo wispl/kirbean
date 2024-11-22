@@ -1,17 +1,6 @@
 package me.wisp.kirbean.interactive.vote;
 
-import me.wisp.kirbean.framework.interactivity.Interactive;
-import net.dv8tion.jda.api.MessageBuilder;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
-
-import java.util.HashSet;
-import java.util.Set;
-import java.util.function.Predicate;
-
+/*
 public class Vote implements Interactive {
 
     private final VotePage page;
@@ -70,3 +59,4 @@ public class Vote implements Interactive {
                 .queue();
     }
 }
+*/

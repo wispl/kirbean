@@ -2,8 +2,8 @@ package me.wisp.kirbean.commands.music;
 
 import me.wisp.kirbean.audio.PlayerRepository;
 import me.wisp.kirbean.audio.player.GuildPlayer;
-import me.wisp.kirbean.framework.SlashCommand;
-import me.wisp.kirbean.framework.annotations.Command;
+import me.wisp.kirbean.core.SlashCommand;
+import me.wisp.kirbean.core.annotations.Command;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 public class Unshuffle implements SlashCommand {

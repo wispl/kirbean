@@ -1,8 +1,8 @@
 package me.wisp.kirbean.commands.fun;
 
-import me.wisp.kirbean.framework.SlashCommand;
-import me.wisp.kirbean.framework.annotations.Command;
-import me.wisp.kirbean.framework.annotations.Option;
+import me.wisp.kirbean.core.SlashCommand;
+import me.wisp.kirbean.core.annotations.Command;
+import me.wisp.kirbean.core.annotations.Option;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
@@ -35,10 +35,11 @@ public class Eightball implements SlashCommand {
     @Command( name = "8ball", description = "Ask the mighty 8ball a question" )
     @Option( name = "question", description = "Ask your worries away..." )
     public void execute(SlashCommandInteractionEvent event) {
-        EmbedBuilder eb = new EmbedBuilder()
-                .setTitle("Question: " + event.getOption("question").getAsString())
-                .setDescription("●:\n" + ANSWERS[ThreadLocalRandom.current().nextInt(ANSWERS.length)]);
+        String answer = ANSWERS[ThreadLocalRandom.current().nextInt(ANSWERS.length)];
 
-        event.replyEmbeds(eb.build()).queue();
+        var builder = new EmbedBuilder()
+                .setTitle("Question: " + event.getOption("question").getAsString())
+                .setDescription("●:\n" + answer);
+        event.replyEmbeds(builder.build()).queue();
     }
 }

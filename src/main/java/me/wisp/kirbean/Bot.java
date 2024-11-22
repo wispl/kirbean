@@ -1,10 +1,9 @@
 package me.wisp.kirbean;
 
 import me.wisp.kirbean.audio.PlayerRepository;
-import me.wisp.kirbean.framework.CommandClient;
-import me.wisp.kirbean.framework.collector.Collector;
+import me.wisp.kirbean.core.CommandClient;
+import me.wisp.kirbean.core.ext.TempListeners;
 import me.wisp.kirbean.messages.MessageListener;
-import me.wisp.kirbean.polls.Polls;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
@@ -30,7 +29,7 @@ public class Bot {
         EnumSet<CacheFlag> disabledCache = EnumSet.of(
                 CacheFlag.ACTIVITY,
                 CacheFlag.CLIENT_STATUS,
-                CacheFlag.EMOTE,
+                CacheFlag.EMOJI,
                 CacheFlag.MEMBER_OVERRIDES,
                 CacheFlag.ONLINE_STATUS,
                 CacheFlag.ROLE_TAGS
@@ -45,9 +44,8 @@ public class Bot {
                 .build();
 
         PlayerRepository.register(jda);
-        Collector.register(jda);
-        Polls.register(jda);
         jda.addEventListener(new MessageListener());
+        jda.addEventListener(new TempListeners());
     }
 
     public void run() throws InterruptedException {

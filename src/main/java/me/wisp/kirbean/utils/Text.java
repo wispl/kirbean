@@ -1,29 +1,42 @@
 package me.wisp.kirbean.utils;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.time.Duration;
 
 public class Text {
-
-    public static String truncate(String text, int maxLength) {
-        if (text.length() <= maxLength) {
-            return text;
-        }
-        return text.substring(0, maxLength - 3) + "...";
+    public static String codeblock(String input) {
+        return "```\n" + input + "\n```";
     }
 
-    // might be a better way
-    public static List<String> chunk(String text, int chunkSize) {
-        int length = text.length();
-        List<String> chunks = new ArrayList<>(length + chunkSize - 1 / chunkSize);
-        for (int i = 0; i < length; i+=chunkSize) {
-            chunks.add(text.substring(i, Math.min(length, i + chunkSize)));
-        }
+    public static String bold(String input) {
+        return "**" + input + "**";
+    }
 
-        return chunks;
+    public static String spoiler(String input) {
+        return "||" + input + "||";
+    }
+
+    public static String link(String text, String link) {
+        return "[" + text + "]" + "(" + link + ")";
     }
 
     public static String rating(int upvote, int downvote) {
-        return "↑ " + upvote + "  ↓ " + downvote;
+        return "↑" + upvote + " ↓" + downvote;
+    }
+
+    public static String prettyDuration(long millis) {
+        var duration = Duration.ofMillis(millis);
+        var hours = duration.toHours();
+        var minutes = duration.toHours();
+        var seconds = duration.toHours();
+
+        var builder = new StringBuilder();
+        if (hours != 0) {
+            builder.append(hours).append(":");
+        }
+        if (minutes != 0) {
+            builder.append(minutes).append(":");
+        }
+        builder.append(seconds);
+        return builder.toString();
     }
 }

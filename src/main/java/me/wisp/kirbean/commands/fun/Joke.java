@@ -1,32 +1,48 @@
 package me.wisp.kirbean.commands.fun;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import me.wisp.kirbean.api.HTTPClient;
-import me.wisp.kirbean.framework.SlashCommand;
-import me.wisp.kirbean.framework.annotations.Command;
-import me.wisp.kirbean.framework.interactivity.Interactivity;
-import me.wisp.kirbean.interactive.supplier.EmbedSupplier;
-import me.wisp.kirbean.interactive.supplier.SupplierPage;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
+import me.wisp.kirbean.core.SlashCommand;
+import me.wisp.kirbean.core.annotations.Command;
+import me.wisp.kirbean.utils.Text;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import okhttp3.Request;
+import okhttp3.Response;
 
-import java.net.URI;
+import java.io.IOException;
 
 public class Joke implements SlashCommand {
-    private static final URI JOKE = URI.create("https://v2.jokeapi.dev/joke/Any?blacklistFlags=nsfw,racist,sexist,explicit");
+    private static final String URL = "https://v2.jokeapi.dev/joke/Any?blacklistFlags=nsfw,racist,sexist,explicit";
+    private static final ObjectReader READER = new ObjectMapper().readerFor(Result.class);
 
     @Command(name = "joke", description = "Fetches a joke, but don't worry, you will always be the biggest joke here.")
     public void execute(SlashCommandInteractionEvent event) {
-        SupplierPage page = new SupplierPage("Joke", this::getJoke, "Did you get it?", false);
-        Interactivity.createInteractive(event, new EmbedSupplier(page));
-    }
-
-    private String getJoke() {
-        JsonNode data = HTTPClient.get(JOKE);
-        String type = "```\n" + data.get("category").asText() + "\n```\n";
-        if (data.get("type").asText().equals("single")) {
-            return type + data.get("joke").asText();
+        Request request = new Request.Builder().url(URL).build();
+        Result joke;
+        try (Response response = event.getJDA().getHttpClient().newCall(request).execute()) {
+            joke = READER.readValue(response.body().toString());
+        } catch (IOException e) {
+            event.reply("Could not fetch jokes. This is a sad day for dads :(").queue();
+            return;
         }
 
-        return type + data.get("setup").asText() + "\n||" + data.get("delivery").asText() + "||";
+        var builder = new EmbedBuilder().setTitle(joke.category + " Jokes")
+                .setFooter("Did you get it? " + "Jokes from jokeapi.dev");
+        if (joke.type.equals("single")) {
+            builder.setDescription(joke.joke);
+        } else {
+            builder.setDescription(joke.setup + "/n" + Text.spoiler(joke.delivery));
+        }
+        event.replyEmbeds(builder.build()).queue();
+    }
+
+    private static class Result {
+        public String category;
+        public String type;
+        public String joke;
+
+        public String setup;
+        public String delivery;
     }
 }

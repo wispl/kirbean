@@ -1,16 +1,12 @@
 package me.wisp.kirbean.commands.utility;
 
-import me.wisp.kirbean.framework.SlashCommand;
-import me.wisp.kirbean.framework.annotations.Choices;
-import me.wisp.kirbean.framework.annotations.Command;
-import me.wisp.kirbean.framework.annotations.Option;
-import me.wisp.kirbean.framework.collector.Collector;
-import me.wisp.kirbean.polls.page.PollPage;
-import me.wisp.kirbean.polls.Polls;
+import me.wisp.kirbean.core.SlashCommand;
+import me.wisp.kirbean.core.annotations.Choices;
+import me.wisp.kirbean.core.annotations.Command;
+import me.wisp.kirbean.core.annotations.Option;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.components.Modal;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 
@@ -18,6 +14,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+    /*
 public class Poll implements SlashCommand {
     private static final Modal MODAL = Modal.create("poll:modal", "Poll Creation")
             .addActionRow(
@@ -50,4 +47,6 @@ public class Poll implements SlashCommand {
 
         Polls.createPoll(event.getTextChannel(), page, duration, unit);
     }
+
 }
+     */
